@@ -9,7 +9,7 @@ let doc = Context.environment["MOCKABLE_DOC"].flatMap(Bool.init) ?? false
 
 func when<T>(_ condition: Bool, _ list: [T]) -> [T] { condition ? list : [] }
 
-#if swift(>=6.0)
+#if compiler(>=6.0)
 let issueReportingDependency: Package.Dependency = .package(
     url: "https://github.com/pointfreeco/swift-issue-reporting",
     from: "2.1.0"
