@@ -10,9 +10,19 @@ let doc = Context.environment["MOCKABLE_DOC"].flatMap(Bool.init) ?? false
 func when<T>(_ condition: Bool, _ list: [T]) -> [T] { condition ? list : [] }
 
 #if swift(>=6.0)
-let xctestDynamicOverlayVersion: Range<Version> = "1.6.1"..<"2.0.0"
+let issueReportingDependency: Package.Dependency = .package(
+    url: "https://github.com/pointfreeco/swift-issue-reporting",
+    from: "2.1.0"
+)
+let issueReportingPackage = "swift-issue-reporting"
 #else
-let xctestDynamicOverlayVersion: Range<Version> = "1.6.1"..<"1.10.0"
+// xctest-dynamic-overlay 1.10.0 switched to `public import Foundation`, which Swift <6
+// rejects when mixed with plain `import Foundation` in the same target.
+let issueReportingDependency: Package.Dependency = .package(
+    url: "https://github.com/pointfreeco/xctest-dynamic-overlay",
+    "1.6.1"..<"1.10.0"
+)
+let issueReportingPackage = "xctest-dynamic-overlay"
 #endif
 
 let devDependencies: [Package.Dependency] = when(test, [
@@ -60,16 +70,14 @@ let package = Package(
     ],
     dependencies: devDependencies + [
         .package(url: "https://github.com/swiftlang/swift-syntax.git", "509.0.0"..<"604.0.0"),
-        // xctest-dynamic-overlay 1.10.0 switched to `public import Foundation`, which Swift <6
-        // rejects when mixed with plain `import Foundation` in the same target.
-        .package(url: "https://github.com/pointfreeco/xctest-dynamic-overlay", xctestDynamicOverlayVersion)
+        issueReportingDependency
     ],
     targets: devTargets + [
         .target(
             name: "Mockable",
             dependencies: [
                 "MockableMacro",
-                .product(name: "IssueReporting", package: "xctest-dynamic-overlay")
+                .product(name: "IssueReporting", package: issueReportingPackage)
             ],
             swiftSettings: [
                 .enableExperimentalFeature("StrictConcurrency"),
